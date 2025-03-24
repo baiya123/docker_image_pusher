@@ -24,3 +24,4 @@ krispx/openwrt-x86_64:latest
 linkease/istorepanel:latest
 openwrt/asu:latest
 evil0ctal/douyin_tiktok_download_api
+lmk123/migpt-server
