@@ -1,3 +1,4 @@
+lscr.io/linuxserver/webtop:ubuntu-xfce
 python:alpine3.19
 nginx
 xiaoyaliu/alist:latest
