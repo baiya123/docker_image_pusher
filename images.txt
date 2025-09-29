@@ -1,3 +1,4 @@
+n8nio/n8n
 ghcr.io/beck-8/subs-check:latest
 lscr.io/linuxserver/webtop:ubuntu-xfce
 python:alpine3.19
