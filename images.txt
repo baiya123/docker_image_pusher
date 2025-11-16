@@ -1,3 +1,5 @@
+codeberg.org/forgejo/forgejo:latest
+gitea/gitea:latest
 n8nio/n8n
 ghcr.io/beck-8/subs-check:latest
 lscr.io/linuxserver/webtop:ubuntu-xfce
