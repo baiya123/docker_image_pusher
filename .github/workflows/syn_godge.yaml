@@ -1,0 +1,68 @@
+name: Sync ARM64 OpenWrt to Aliyun
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+env:
+  ALIYUN_REGISTRY: "${{ secrets.ALIYUN_REGISTRY }}"
+  ALIYUN_NAME_SPACE: "${{ secrets.ALIYUN_NAME_SPACE }}"
+  ALIYUN_REGISTRY_USER: "${{ secrets.ALIYUN_REGISTRY_USER }}"
+  ALIYUN_REGISTRY_PASSWORD: "${{ secrets.ALIYUN_REGISTRY_PASSWORD }}"
+
+jobs:
+  build:
+    name: Pull and Push ARM64 Image
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+      with:
+        platforms: arm64
+      # 必须步骤：让 GitHub 的 x86 机器能处理 ARM64 镜像
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Aliyun Registry
+      run: |
+        docker login -u $ALIYUN_REGISTRY_USER -p $ALIYUN_REGISTRY_PASSWORD $ALIYUN_REGISTRY
+
+    - name: Pull, Tag, and Push
+      run: |
+        while IFS= read -r line; do
+            # 忽略空行和注释
+            [[ -z "$line" ]] && continue
+            if echo "$line" | grep -q '^\s*#'; then
+                continue
+            fi
+            
+            # 清理可能的空格和 Windows 回车符（防止报错）
+            image=$(echo "$line" | tr -d '\r' | xargs)
+            echo "========================================="
+            echo "开始处理镜像: $image"
+            
+            # 1. 强制指定 arm64 架构拉取镜像
+            echo "--> 拉取 ARM64 镜像: $image"
+            docker pull --platform linux/arm64 $image
+            
+            # 2. 提取纯镜像名和标签 (例如从 piaoyizy/openwrt-aarch64:latest 提取 openwrt-aarch64:latest)
+            image_name_tag=$(echo "$image" | awk -F'/' '{print $NF}')
+            
+            # 3. 拼接阿里云的完整目标地址
+            new_image="$ALIYUN_REGISTRY/$ALIYUN_NAME_SPACE/$image_name_tag"
+            
+            # 4. 重新打标签
+            echo "--> 打标签: $new_image"
+            docker tag $image $new_image
+            
+            # 5. 推送到阿里云
+            echo "--> 推送到阿里云..."
+            docker push $new_image
+            
+            echo "处理完成: $new_image"
+        done < images.txt
