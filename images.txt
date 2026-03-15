@@ -1,3 +1,4 @@
+piaoyizy/openwrt-aarch64:latest
 codeberg.org/forgejo/forgejo:latest
 gitea/gitea:latest
 n8nio/n8n
